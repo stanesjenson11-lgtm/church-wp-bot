@@ -1,0 +1,12 @@
+{
+  "WORKERS_SUBDOMAIN": "",
+  "PHONE_NUMBER_ID": "",
+  "WABA_ID": "",
+  "BOT_NUMBER": "",
+  "OWNER_PHONE": "",
+  "GRAPH_API_VERSION": "v24.0",
+  "secrets": {
+    "APP_SECRET": "",
+    "WHATSAPP_TOKEN": ""
+  }
+}

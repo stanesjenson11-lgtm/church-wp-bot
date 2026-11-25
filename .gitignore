@@ -11,3 +11,7 @@ worker-configuration.d.ts
 !.dev.vars.example
 .env*
 .DS_Store
+
+# Real setup values (Meta IDs, tokens) and the generated verify token
+setup.local.json
+*.local.txt
