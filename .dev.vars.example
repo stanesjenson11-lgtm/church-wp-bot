@@ -2,6 +2,9 @@
 WHATSAPP_TOKEN=
 APP_SECRET=
 VERIFY_TOKEN=
+PHONE_NUMBER_ID=
+BOT_NUMBER=
+OWNER_PHONE=
 DRY_RUN=true
 # Optional email relay (apps-script/Code.gs)
 MAIL_RELAY_URL=

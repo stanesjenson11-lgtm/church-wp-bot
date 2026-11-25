@@ -79,8 +79,8 @@ Everything goes into **`setup.local.json`** in the project folder. The file is i
 
 For context only. Claude Code will:
 1. Have the owner run `! npx wrangler login` and approve it in the browser.
-2. Create the D1 database `church-bot`, apply `migrations/`, and put the database ID and the non-secret values in `wrangler.jsonc`.
-3. Generate a random `VERIFY_TOKEN`. Upload `WHATSAPP_TOKEN`, `APP_SECRET` and `VERIFY_TOKEN` as Worker secrets with `wrangler secret bulk`, so nothing is printed.
+2. Create the D1 database `church-bot`, apply `migrations/`, and put the database ID in `wrangler.jsonc`.
+3. Generate a random `VERIFY_TOKEN`. Upload it with `WHATSAPP_TOKEN`, `APP_SECRET`, `PHONE_NUMBER_ID`, `BOT_NUMBER` and `OWNER_PHONE` as Worker secrets using `wrangler secret bulk`, so nothing is printed and no phone number reaches the public repo.
 4. Deploy with `pnpm run deploy`, giving `https://church-bot.<WORKERS_SUBDOMAIN>.workers.dev`, and check `/health`.
 5. Give the owner the **Callback URL**, and save the **verify token** to `verify-token.local.txt` (git-ignored) for the owner to copy.
 

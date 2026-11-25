@@ -31,15 +31,15 @@
   "observability": { "enabled": true },
 
   "vars": {
-    // From Meta → WhatsApp → API Setup.
-    "PHONE_NUMBER_ID": "",
+    // The version in the sample request on Meta → WhatsApp → API Setup.
     "GRAPH_API_VERSION": "v24.0",
-    // The bot's WhatsApp number, digits only with country code (for wa.me links).
-    "BOT_NUMBER": "",
-    // The first admin's WhatsApp number, digits only with country code.
-    "OWNER_PHONE": "",
     "DRY_RUN": "false"
   }
-  // Secrets (npx wrangler secret put NAME): WHATSAPP_TOKEN, APP_SECRET,
-  // VERIFY_TOKEN, and optionally MAIL_RELAY_URL, MAIL_RELAY_KEY.
+  // Secrets, uploaded with `npx wrangler secret bulk` (this repo is public, so
+  // phone numbers and Meta ids stay out of it too):
+  //   WHATSAPP_TOKEN, APP_SECRET, VERIFY_TOKEN
+  //   PHONE_NUMBER_ID   Meta → WhatsApp → API Setup
+  //   BOT_NUMBER        the bot's WhatsApp number, digits with country code (wa.me links)
+  //   OWNER_PHONE       the first admin's WhatsApp number, digits with country code
+  //   MAIL_RELAY_URL, MAIL_RELAY_KEY (optional, apps-script/Code.gs)
 }

@@ -58,14 +58,14 @@ WhatsApp ─▶ Meta Cloud API ─▶ ONE Cloudflare Worker (church-bot.<you>.wo
 | `APP_SECRET` | secret | Meta App → App settings → Basic → App secret |
 | `VERIFY_TOKEN` | secret | A random string Claude generates. The user pastes it into Meta's webhook settings |
 | `MAIL_RELAY_URL`, `MAIL_RELAY_KEY` | secret, optional | Phase 4 |
-| `PHONE_NUMBER_ID` | var | Meta → WhatsApp → API Setup |
+| `PHONE_NUMBER_ID` | secret | Meta → WhatsApp → API Setup (kept out of the public repo) |
 | `GRAPH_API_VERSION` | var | The version in the sample curl on API Setup (e.g. `v24.0`) |
-| `BOT_NUMBER` | var | The bot's number, digits only with country code (used for sign-in and share links) |
-| `OWNER_PHONE` | var | The first admin's WhatsApp number, digits only with country code |
+| `BOT_NUMBER` | secret | The bot's number, digits only with country code (used for sign-in and share links) |
+| `OWNER_PHONE` | secret | The first admin's WhatsApp number, digits only with country code |
 | `DRY_RUN` | var | `"true"` only in local `.dev.vars`: logs replies instead of calling Meta |
 | `DB` | D1 binding | `npx wrangler d1 create church-bot` (Phase 3) |
 
-Local values go in `.dev.vars`, which is gitignored; `.dev.vars.example` lists the names. Production secrets are set with `npx wrangler secret put NAME`, and vars go in `wrangler.jsonc`.
+Local values go in `.dev.vars`, which is gitignored; `.dev.vars.example` lists the names. Production secrets are set with `npx wrangler secret put NAME` (or `secret bulk`), and the remaining vars go in `wrangler.jsonc`. The repo is public, so phone numbers and Meta IDs are secrets too.
 
 ## 4. Information to collect from the user (Phase 0)
 
@@ -129,9 +129,9 @@ Everything else is edited later in the dashboard. Unknown values stay as `[EDIT 
 2. 🤖 Create the database:
    1. Run `npx wrangler d1 create church-bot` and put the `database_id` it prints in `wrangler.jsonc`.
    2. Run `npx wrangler d1 migrations apply church-bot --remote`.
-3. 🤖 Set the vars in `wrangler.jsonc`: `PHONE_NUMBER_ID`, `GRAPH_API_VERSION`, `BOT_NUMBER` (the test number for now) and `OWNER_PHONE`. Keep `DRY_RUN` as `"false"`.
-4. 🤖 Generate `VERIFY_TOKEN`. Set the secrets `WHATSAPP_TOKEN`, `APP_SECRET` and `VERIFY_TOKEN` with `npx wrangler secret put`.
-5. 🤖 Run `pnpm run deploy`, which runs `next build` and then `wrangler deploy`. Note the URL and check `<url>/health`.
+3. 🤖 Set `GRAPH_API_VERSION` in `wrangler.jsonc` and keep `DRY_RUN` as `"false"`. Anything account-specific stays out of this public repo (step 5).
+4. 🤖 Run `pnpm run deploy`, which runs `next build` and then `wrangler deploy`. Note the URL.
+5. 🤖 Generate `VERIFY_TOKEN`. Upload it together with `WHATSAPP_TOKEN`, `APP_SECRET`, `PHONE_NUMBER_ID`, `BOT_NUMBER` (the test number for now) and `OWNER_PHONE`, all at once with `npx wrangler secret bulk <file>`. Use a temporary file and delete it afterwards. Then check `<url>/health`.
 6. 🧑 In the Meta app, go to **WhatsApp → Configuration → Webhook → Edit**:
    - Callback URL: `<worker URL>/webhook`
    - Verify token: the `VERIFY_TOKEN` (Claude shows it once)
