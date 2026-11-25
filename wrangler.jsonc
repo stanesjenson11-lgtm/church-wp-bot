@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "church-bot",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-11-20",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The dashboard is a Next.js static export (`next build` → ./out). Static
+  // files are served free and don't count toward the 100k requests a day; only
+  // these paths reach the Worker.
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/webhook", "/media/*", "/health"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "church-bot",
+      // Filled in by `npx wrangler d1 create church-bot` (Phase 3).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // 02:00 India time: clear old dedup ids, expired chats, sessions and logins.
+  "triggers": { "crons": ["30 20 * * *"] },
+
+  "observability": { "enabled": true },
+
+  "vars": {
+    // From Meta → WhatsApp → API Setup.
+    "PHONE_NUMBER_ID": "",
+    "GRAPH_API_VERSION": "v24.0",
+    // The bot's WhatsApp number, digits only with country code (for wa.me links).
+    "BOT_NUMBER": "",
+    // The first admin's WhatsApp number, digits only with country code.
+    "OWNER_PHONE": "",
+    "DRY_RUN": "false"
+  }
+  // Secrets (npx wrangler secret put NAME): WHATSAPP_TOKEN, APP_SECRET,
+  // VERIFY_TOKEN, and optionally MAIL_RELAY_URL, MAIL_RELAY_KEY.
+}

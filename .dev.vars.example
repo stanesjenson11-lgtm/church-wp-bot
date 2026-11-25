@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `wrangler dev`. Names only — never commit values.
+WHATSAPP_TOKEN=
+APP_SECRET=
+VERIFY_TOKEN=
+DRY_RUN=true
+# Optional email relay (apps-script/Code.gs)
+MAIL_RELAY_URL=
+MAIL_RELAY_KEY=

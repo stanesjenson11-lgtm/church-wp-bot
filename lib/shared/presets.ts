@@ -1,0 +1,527 @@
+import type { BlockInput } from "./blocks";
+
+/**
+ * The template gallery. Each preset is an ordinary block, with church-ready
+ * sample text the admin edits. `icon` is a lucide-react icon name; the dashboard
+ * maps it, so this file stays free of React and the Worker can seed from it.
+ */
+export type Preset = {
+  key: string;
+  name: string;
+  blurb: string;
+  icon: string;
+  category: "Essentials" | "Forms" | "Community" | "Custom";
+  block: BlockInput;
+};
+
+const KJV_VERSES = [
+  "*\"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.\"*\n— John 3:16",
+  "*\"The LORD is my shepherd; I shall not want.\"*\n— Psalm 23:1",
+  "*\"I can do all things through Christ which strengtheneth me.\"*\n— Philippians 4:13",
+  "*\"Trust in the LORD with all thine heart; and lean not unto thine own understanding.\"*\n— Proverbs 3:5",
+  "*\"Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.\"*\n— Joshua 1:9",
+  "*\"Come unto me, all ye that labour and are heavy laden, and I will give you rest.\"*\n— Matthew 11:28",
+  "*\"And we know that all things work together for good to them that love God.\"*\n— Romans 8:28",
+  "*\"Fear thou not; for I am with thee: be not dismayed; for I am thy God.\"*\n— Isaiah 41:10",
+  "*\"Thy word is a lamp unto my feet, and a light unto my path.\"*\n— Psalm 119:105",
+  "*\"Casting all your care upon him; for he careth for you.\"*\n— 1 Peter 5:7",
+  "*\"The LORD bless thee, and keep thee: the LORD make his face shine upon thee, and be gracious unto thee.\"*\n— Numbers 6:24-25",
+  "*\"This is the day which the LORD hath made; we will rejoice and be glad in it.\"*\n— Psalm 118:24",
+  "*\"Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.\"*\n— Philippians 4:6",
+  "*\"But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles.\"*\n— Isaiah 40:31",
+  "*\"Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me.\"*\n— John 14:6",
+  "*\"God is our refuge and strength, a very present help in trouble.\"*\n— Psalm 46:1",
+  "*\"Peace I leave with you, my peace I give unto you.\"*\n— John 14:27",
+  "*\"Rejoice in the Lord alway: and again I say, Rejoice.\"*\n— Philippians 4:4",
+  "*\"Delight thyself also in the LORD; and he shall give thee the desires of thine heart.\"*\n— Psalm 37:4",
+  "*\"Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.\"*\n— 2 Corinthians 5:17",
+  "*\"The LORD is my light and my salvation; whom shall I fear?\"*\n— Psalm 27:1",
+  "*\"Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you.\"*\n— Matthew 7:7",
+  "*\"Charity suffereth long, and is kind; charity envieth not; charity vaunteth not itself, is not puffed up.\"*\n— 1 Corinthians 13:4",
+  "*\"O give thanks unto the LORD; for he is good: for his mercy endureth for ever.\"*\n— Psalm 136:1",
+  "*\"Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.\"*\n— Psalm 37:5",
+  "*\"Let your light so shine before men, that they may see your good works, and glorify your Father which is in heaven.\"*\n— Matthew 5:16",
+  "*\"The name of the LORD is a strong tower: the righteous runneth into it, and is safe.\"*\n— Proverbs 18:10",
+  "*\"For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.\"*\n— Jeremiah 29:11",
+  "*\"Create in me a clean heart, O God; and renew a right spirit within me.\"*\n— Psalm 51:10",
+  "*\"Seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.\"*\n— Matthew 6:33",
+  "*\"The grace of our Lord Jesus Christ be with you all. Amen.\"*\n— Revelation 22:21",
+];
+
+export const PRESETS: Preset[] = [
+  // ---- Essentials (the six seeded on first run) ----
+  {
+    key: "service_times",
+    name: "Service Timings",
+    blurb: "Sunday and weekday service times.",
+    icon: "Clock",
+    category: "Essentials",
+    block: {
+      type: "text",
+      title: "Service Timings",
+      description: "Sunday & weekday services",
+      keywords: "timings, timing, service, services, time, sunday",
+      enabled: true,
+      data: {
+        body: "*Sunday Worship*\n🕖 7:00 AM · English\n🕘 9:30 AM · [EDIT ME]\n\n*Wednesday Prayer Meeting*\n🕖 7:00 PM\n\n*Friday Fasting Prayer*\n🕙 10:00 AM\n\n_[EDIT ME] Change these to your church's timings._",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+  {
+    key: "events",
+    name: "Events & Registration",
+    blurb: "Upcoming events. Members can register in the chat.",
+    icon: "CalendarDays",
+    category: "Essentials",
+    block: {
+      type: "events",
+      title: "Upcoming Events",
+      description: "Programmes & registration",
+      keywords: "events, event, programme, programs, register",
+      enabled: true,
+      data: {
+        intro: "Here's what's coming up. Tap an event to see the details or register. 🗓️",
+        empty: "No upcoming events are listed right now. Please check back soon.",
+      },
+    },
+  },
+  {
+    key: "prayer",
+    name: "Prayer Request",
+    blurb: "A private request that only the pastor and prayer team can read.",
+    icon: "HandHeart",
+    category: "Essentials",
+    block: {
+      type: "form",
+      title: "Prayer Request",
+      description: "Our prayer team will pray for you",
+      keywords: "prayer, pray, prayers",
+      enabled: true,
+      data: {
+        intro: "🙏 We'd be glad to pray with you. Only our pastor and prayer team will see this.",
+        questions: [{ id: "request", label: "Please type your prayer request in one message.", kind: "text", optional: false }],
+        private: true,
+        thanks: "Thank you. Our prayer team will be praying for you. 🙏\n\n_\"Casting all your care upon him; for he careth for you.\" (1 Peter 5:7)_",
+      },
+    },
+  },
+  {
+    key: "give",
+    name: "Give / Offering",
+    blurb: "UPI ID and QR code for tithes and offerings.",
+    icon: "HandCoins",
+    category: "Essentials",
+    block: {
+      type: "text",
+      title: "Give / Offering",
+      description: "UPI details for tithes & offerings",
+      keywords: "give, giving, offering, tithe, upi, donate",
+      enabled: true,
+      data: {
+        body: "*Give by UPI*\nUPI ID: [EDIT ME]@upi\nName: [EDIT ME]\n\nBefore you pay, check that your UPI app shows the name *[EDIT ME]*.\n\n_\"God loveth a cheerful giver.\" (2 Corinthians 9:7)_",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+  {
+    key: "location",
+    name: "Church Location",
+    blurb: "Sends a map pin that opens in Google Maps.",
+    icon: "MapPin",
+    category: "Essentials",
+    block: {
+      type: "location",
+      title: "Church Location",
+      description: "Address & directions",
+      keywords: "location, address, directions, map, where",
+      enabled: true,
+      data: { name: "[EDIT ME] Church", address: "[EDIT ME] Street, City, PIN", latitude: 20.5937, longitude: 78.9629 },
+    },
+  },
+  {
+    key: "contact",
+    name: "Contact Office",
+    blurb: "Office phone number and office hours.",
+    icon: "Phone",
+    category: "Essentials",
+    block: {
+      type: "text",
+      title: "Contact Office",
+      description: "Phone number & office hours",
+      keywords: "contact, office, phone, call",
+      enabled: true,
+      data: {
+        body: "*Church Office*\n📞 [EDIT ME] +91 00000 00000\n🕘 Tue–Sat, 10:00 AM – 5:00 PM\n✉️ [EDIT ME] office@church.org",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+
+  // ---- Forms ----
+  {
+    key: "membership",
+    name: "Become a Member",
+    blurb: "A short membership form. The pastor sees each answer in the Inbox.",
+    icon: "UserPlus",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "Become a Member",
+      description: "Join our church family",
+      keywords: "member, membership, join",
+      enabled: true,
+      data: {
+        intro: "We're so glad you'd like to join our church family! 🙌 Please answer a few short questions.",
+        questions: [
+          { id: "name", label: "What's your full name?", kind: "text", optional: false },
+          { id: "dob", label: "Your date of birth (DD-MM-YYYY)", kind: "date", optional: false },
+          { id: "address", label: "Your home address", kind: "text", optional: false },
+          { id: "baptised", label: "Have you been baptised?", kind: "yesno", optional: false },
+          { id: "family", label: "How many people in your family would like to join, including you?", kind: "number", optional: false },
+          { id: "previous", label: "Which church did you attend before?", kind: "text", optional: true },
+        ],
+        private: false,
+        thanks: "Thank you! Our pastor will contact you soon about membership. God bless you. 🙏",
+      },
+    },
+  },
+  {
+    key: "visitor",
+    name: "New Here?",
+    blurb: "Lets a first-time visitor say hello and ask for a call.",
+    icon: "Sparkles",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "New Here?",
+      description: "First time with us? Say hello",
+      keywords: "new, visitor, first time, hello",
+      enabled: true,
+      data: {
+        intro: "Welcome! 😊 We'd love to get to know you.",
+        questions: [
+          { id: "name", label: "What's your name?", kind: "text", optional: false },
+          { id: "heard", label: "How did you hear about us?", kind: "choice", options: ["Friend or family", "Social media", "Walked by", "Other"], optional: false },
+          { id: "call", label: "Would you like someone from the church to call you?", kind: "yesno", optional: false },
+        ],
+        private: false,
+        thanks: "Thank you for visiting! We hope to see you again this Sunday. 😊",
+      },
+    },
+  },
+  {
+    key: "pastoral",
+    name: "Pastoral Visit",
+    blurb: "A private request for a visit, a call or counselling.",
+    icon: "House",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "Pastoral Visit",
+      description: "Request a visit or counselling",
+      keywords: "visit, counselling, counseling, pastor, talk",
+      enabled: true,
+      data: {
+        intro: "Our pastor would be glad to visit or meet you. Only the pastor and church office will see this.",
+        questions: [
+          { id: "kind", label: "What would you like?", kind: "choice", options: ["Home visit", "Hospital visit", "Counselling", "A phone call"], optional: false },
+          { id: "when", label: "When suits you best? (day and time)", kind: "text", optional: false },
+          { id: "note", label: "Is there anything you'd like the pastor to know first?", kind: "text", optional: true },
+        ],
+        private: true,
+        thanks: "Thank you. Our pastor will contact you to arrange this. 🙏",
+      },
+    },
+  },
+  {
+    key: "sacraments",
+    name: "Baptism & Weddings",
+    blurb: "Booking requests for a baptism, wedding or child dedication.",
+    icon: "Droplets",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "Baptism & Weddings",
+      description: "Baptism, wedding or dedication",
+      keywords: "baptism, wedding, marriage, dedication",
+      enabled: true,
+      data: {
+        intro: "We'd be happy to help you plan this. 💒",
+        questions: [
+          { id: "kind", label: "What would you like to book?", kind: "choice", options: ["Baptism", "Wedding", "Child dedication"], optional: false },
+          { id: "names", label: "Full name(s) of the people involved", kind: "text", optional: false },
+          { id: "date", label: "Preferred date (DD-MM-YYYY)", kind: "date", optional: true },
+        ],
+        private: false,
+        thanks: "Thank you! The church office will contact you to arrange the details.",
+      },
+    },
+  },
+  {
+    key: "volunteer",
+    name: "Serve With Us",
+    blurb: "Volunteer sign-up for each ministry team.",
+    icon: "HeartHandshake",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "Serve With Us",
+      description: "Volunteer in a ministry",
+      keywords: "serve, volunteer, help, team",
+      enabled: true,
+      data: {
+        intro: "Thank you for wanting to serve! 🙌",
+        questions: [
+          { id: "name", label: "What's your name?", kind: "text", optional: false },
+          {
+            id: "team",
+            label: "Where would you like to serve?",
+            kind: "choice",
+            options: ["Worship & music", "Sunday School", "Ushering", "Media & sound", "Food", "Prayer team", "Cleaning", "Other"],
+            optional: false,
+          },
+          { id: "when", label: "When are you free?", kind: "choice", options: ["Sundays", "Weekdays", "Both"], optional: false },
+        ],
+        private: false,
+        thanks: "Wonderful! A team leader will contact you soon.",
+      },
+    },
+  },
+  {
+    key: "testimony",
+    name: "Share a Testimony",
+    blurb: "Collects testimonies, and asks whether each one may be shared.",
+    icon: "MessageSquareHeart",
+    category: "Forms",
+    block: {
+      type: "form",
+      title: "Share a Testimony",
+      description: "Tell us what God has done",
+      keywords: "testimony, praise, report",
+      enabled: true,
+      data: {
+        intro: "We'd love to hear what God has done in your life! 🙌",
+        questions: [
+          { id: "name", label: "What's your name?", kind: "text", optional: false },
+          { id: "story", label: "Please share your testimony in one message.", kind: "text", optional: false },
+          { id: "share", label: "May we share it with the church?", kind: "yesno", optional: false },
+        ],
+        private: false,
+        thanks: "Thank you for sharing! Praise God! 🙌",
+      },
+    },
+  },
+
+  // ---- Community ----
+  {
+    key: "ministries",
+    name: "Ministries & Groups",
+    blurb: "A list of ministries. Tap one to read about it.",
+    icon: "UsersRound",
+    category: "Community",
+    block: {
+      type: "submenu",
+      title: "Ministries & Groups",
+      description: "Youth, women, men & more",
+      keywords: "ministries, ministry, groups, youth, fellowship",
+      enabled: true,
+      data: {
+        intro: "There's a place for everyone. Tap a ministry to learn more.",
+        button: "See ministries",
+        items: [
+          { id: "youth", title: "Youth Fellowship", description: "Ages 15–30", body: "*Youth Fellowship*\n🗓️ Saturdays, 5:00 PM\n📍 [EDIT ME] Youth Hall\n\nWorship, Bible study and friendship." },
+          { id: "women", title: "Women's Fellowship", description: "Prayer & Bible study", body: "*Women's Fellowship*\n🗓️ [EDIT ME] Every 2nd Saturday, 10:00 AM" },
+          { id: "men", title: "Men's Fellowship", description: "Brotherhood & prayer", body: "*Men's Fellowship*\n🗓️ [EDIT ME] Last Sunday, after service" },
+          { id: "choir", title: "Choir", description: "Sing with us", body: "*Choir*\n🎵 Practice: [EDIT ME] Fridays, 6:30 PM\n\nEveryone who loves to sing is welcome." },
+          { id: "seniors", title: "Senior Saints", description: "Fellowship for elders", body: "*Senior Saints*\n🗓️ [EDIT ME] First Thursday, 11:00 AM" },
+        ],
+      },
+    },
+  },
+  {
+    key: "faq",
+    name: "Questions (FAQ)",
+    blurb: "Answers to the questions newcomers ask most.",
+    icon: "CircleHelp",
+    category: "Community",
+    block: {
+      type: "submenu",
+      title: "Questions",
+      description: "Common questions answered",
+      keywords: "faq, help, question, questions",
+      enabled: true,
+      data: {
+        intro: "Here are answers to some common questions.",
+        button: "See questions",
+        items: [
+          { id: "wear", title: "What should I wear?", description: "", body: "Come as you are! There's no dress code." },
+          { id: "parking", title: "Is there parking?", description: "", body: "[EDIT ME] Yes, free parking is available next to the church." },
+          { id: "kids", title: "What about my kids?", description: "", body: "Children are welcome! Sunday School runs during the main service for ages 3–14." },
+          { id: "length", title: "How long is the service?", description: "", body: "About [EDIT ME] 90 minutes, including worship and the sermon." },
+        ],
+      },
+    },
+  },
+  {
+    key: "verse",
+    name: "Verse of the Day",
+    blurb: "A different Bible verse each day (KJV, public domain).",
+    icon: "BookOpen",
+    category: "Community",
+    block: {
+      type: "verse",
+      title: "Verse of the Day",
+      description: "A Bible verse for today",
+      keywords: "verse, bible, word, scripture",
+      enabled: true,
+      data: { verses: KJV_VERSES },
+    },
+  },
+  {
+    key: "sermons",
+    name: "Sermons & Live",
+    blurb: "The live stream link and past sermons.",
+    icon: "MonitorPlay",
+    category: "Community",
+    block: {
+      type: "text",
+      title: "Sermons & Live",
+      description: "Watch the service online",
+      keywords: "sermon, sermons, live, youtube, watch, stream",
+      enabled: true,
+      data: {
+        body: "Watch our Sunday service live and catch up on past sermons. 📺\n\n🔴 Live every Sunday at [EDIT ME] 9:30 AM",
+        imageId: null,
+        link: { label: "Watch now", url: "https://www.youtube.com/@EDIT-ME" },
+      },
+    },
+  },
+  {
+    key: "sunday_school",
+    name: "Sunday School & Kids",
+    blurb: "Classes and timings for children.",
+    icon: "Baby",
+    category: "Community",
+    block: {
+      type: "text",
+      title: "Sunday School & Kids",
+      description: "Classes for children",
+      keywords: "sunday school, kids, children, child",
+      enabled: true,
+      data: {
+        body: "*Sunday School*\n🕘 Sundays, 9:30 AM (during the main service)\n\n👶 Ages 3–5 · Little Lambs\n🧒 Ages 6–10 · Juniors\n🧑 Ages 11–14 · Teens\n\n_[EDIT ME] Change these to your classes._",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+  {
+    key: "announcements",
+    name: "Notice Board",
+    blurb: "This week's announcements. Update it every week.",
+    icon: "Megaphone",
+    category: "Community",
+    block: {
+      type: "text",
+      title: "Notice Board",
+      description: "This week's announcements",
+      keywords: "news, notice, notices, announcements, announcement",
+      enabled: true,
+      data: {
+        body: "*This week*\n• [EDIT ME] Youth retreat registration closes Friday\n• [EDIT ME] Choir practice moves to 7 PM",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+  {
+    key: "about",
+    name: "About Us",
+    blurb: "Who you are and what you believe.",
+    icon: "Church",
+    category: "Community",
+    block: {
+      type: "text",
+      title: "About Us",
+      description: "Who we are & what we believe",
+      keywords: "about, beliefs, believe, who",
+      enabled: true,
+      data: {
+        body: "*About [EDIT ME] Church*\nWe are a family of believers who love God and love people.\n\n*We believe*\n• In one God: Father, Son and Holy Spirit\n• The Bible is God's Word\n• Salvation is by grace, through faith in Jesus Christ",
+        imageId: null,
+        link: null,
+      },
+    },
+  },
+  {
+    key: "channel",
+    name: "Church Channel",
+    blurb: "A link to the free WhatsApp Channel, where announcements go.",
+    icon: "Radio",
+    category: "Community",
+    block: {
+      type: "text",
+      title: "Church Channel",
+      description: "Announcements on WhatsApp",
+      keywords: "channel, updates, follow",
+      enabled: true,
+      data: {
+        body: "Follow our WhatsApp Channel for announcements and updates. It's free, and your number stays private. 📣",
+        imageId: null,
+        link: { label: "Follow", url: "https://whatsapp.com/channel/EDIT-ME" },
+      },
+    },
+  },
+
+  // ---- Custom ----
+  {
+    key: "blank_text",
+    name: "Blank message",
+    blurb: "Any text, with an optional picture or link.",
+    icon: "Type",
+    category: "Custom",
+    block: { type: "text", title: "New item", description: "", keywords: "", enabled: false, data: { body: "Write your message here.", imageId: null, link: null } },
+  },
+  {
+    key: "blank_form",
+    name: "Blank form",
+    blurb: "Ask up to 10 questions of your own.",
+    icon: "ClipboardList",
+    category: "Custom",
+    block: {
+      type: "form",
+      title: "New form",
+      description: "",
+      keywords: "",
+      enabled: false,
+      data: {
+        intro: "Please answer a few questions.",
+        questions: [{ id: "q1", label: "Your first question", kind: "text", optional: false }],
+        private: false,
+        thanks: "Thank you!",
+      },
+    },
+  },
+  {
+    key: "blank_submenu",
+    name: "Blank list",
+    blurb: "A list of up to 10 items, each with its own text.",
+    icon: "ListTree",
+    category: "Custom",
+    block: {
+      type: "submenu",
+      title: "New list",
+      description: "",
+      keywords: "",
+      enabled: false,
+      data: { intro: "Tap an item to learn more.", button: "Open list", items: [{ id: "i1", title: "First item", description: "", body: "Text for the first item." }] },
+    },
+  },
+];
+
+/** What a brand-new bot starts with: the six options from the original plan. */
+export const STARTER_KEYS = ["service_times", "events", "prayer", "give", "location", "contact"];
