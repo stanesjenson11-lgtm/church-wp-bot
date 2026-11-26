@@ -84,14 +84,35 @@ export async function pollLogin(env: Env, req: Request): Promise<{ status: Login
   const used = await env.DB.prepare("DELETE FROM login_requests WHERE id = ?").bind(row.id).run();
   if (!used.meta.changes || !(await isAdmin(env, row.approved_by))) return { status: "expired", setCookies: [clearPending] };
 
-  const sid = randomToken();
-  await env.DB.prepare("INSERT INTO sessions (id_hash, phone, user_agent, created_at, expires_at) VALUES (?, ?, ?, ?, ?)")
-    .bind(await sha256(sid), row.approved_by, (req.headers.get("user-agent") ?? "").slice(0, 200), nowIso(), expiry())
-    .run();
-  return { status: "approved", setCookies: [clearPending, cookie(SESSION_COOKIE, sid, SESSION_DAYS * 86_400)] };
+  return { status: "approved", setCookies: [clearPending, await createSession(env, req, row.approved_by)] };
 }
 
 const expiry = () => new Date(Date.now() + SESSION_DAYS * 86_400_000).toISOString();
+
+/** A new session for `phone`; returns its Set-Cookie header. */
+async function createSession(env: Env, req: Request, phone: string): Promise<string> {
+  const sid = randomToken();
+  await env.DB.prepare("INSERT INTO sessions (id_hash, phone, user_agent, created_at, expires_at) VALUES (?, ?, ?, ?, ?)")
+    .bind(await sha256(sid), phone, (req.headers.get("user-agent") ?? "").slice(0, 200), nowIso(), expiry())
+    .run();
+  return cookie(SESSION_COOKIE, sid, SESSION_DAYS * 86_400);
+}
+
+/**
+ * Temporary sign-in with the SETUP_KEY secret, for trying the dashboard before
+ * WhatsApp is connected. Signs in as the owner. Off unless SETUP_KEY is set;
+ * remove it with `npx wrangler secret delete SETUP_KEY` once WhatsApp works.
+ */
+export async function keyLogin(env: Env, req: Request, key: string): Promise<string | null> {
+  const expected = env.SETUP_KEY;
+  if (!expected) return null;
+  // Compare hashes: equal length, so the check takes the same time either way.
+  const [a, b] = await Promise.all([sha256(key), sha256(expected)]);
+  if (!crypto.subtle.timingSafeEqual(new TextEncoder().encode(a), new TextEncoder().encode(b))) return null;
+  const phone = env.OWNER_PHONE?.replace(/\D/g, "") || "0";
+  await env.DB.prepare("INSERT OR IGNORE INTO admins (phone, name, role, created_at) VALUES (?, 'Owner', 'admin', ?)").bind(phone, nowIso()).run();
+  return createSession(env, req, phone);
+}
 
 /** The signed-in admin, or null. Extends the session at most once a day. */
 export async function currentActor(env: Env, req: Request): Promise<Actor | null> {

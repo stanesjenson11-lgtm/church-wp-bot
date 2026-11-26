@@ -7,7 +7,9 @@ import { useCallback, useEffect, useState } from "react";
 import { QrCode } from "@/components/qr-code";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ApiError, api } from "@/lib/api";
 import type { LoginStart } from "@/lib/shared/api";
 import { cn } from "@/lib/utils";
 
@@ -21,18 +23,31 @@ export default function LoginPage() {
   const router = useRouter();
   const [login, setLogin] = useState<LoginStart | null>(null);
   const [state, setState] = useState<"waiting" | "expired" | "error">("waiting");
+  const [problem, setProblem] = useState<string | null>(null);
 
   const start = useCallback(async () => {
     setState("waiting");
     setLogin(null);
     try {
       setLogin(await api.loginStart());
-    } catch {
+    } catch (e) {
+      setProblem(e instanceof ApiError ? e.message : null);
       setState("error");
     }
   }, []);
 
   useEffect(() => {
+    // A setup-key link (/admin/login#key=…): the key never leaves the browser
+    // except in this request, and is wiped from the address bar at once.
+    const key = location.hash.startsWith("#key=") ? decodeURIComponent(location.hash.slice(5)) : "";
+    if (key) {
+      history.replaceState(null, "", location.pathname);
+      api.loginWithKey(key).then(
+        () => location.assign("/admin"),
+        () => void start(),
+      );
+      return;
+    }
     // Already signed in on this browser: straight to the dashboard.
     api.me().then(() => router.replace("/admin"), () => void start());
   }, [router, start]);
@@ -69,7 +84,9 @@ export default function LoginPage() {
 
         <div aria-live="polite" className="rounded-[22px] bg-muted px-4 py-5 squircle">
           {state === "error" ? (
-            <p className="text-sm text-destructive">The sign-in service didn&apos;t answer. Check your connection and try again.</p>
+            <p className="text-sm text-destructive">
+              {problem ?? "The sign-in service didn't answer. Check your connection and try again."}
+            </p>
           ) : login ? (
             <>
               <p className="text-xs font-medium text-muted-foreground">Your code</p>
@@ -125,7 +142,49 @@ export default function LoginPage() {
         <p className="text-xs text-muted-foreground">
           {state === "expired" ? "That code has expired. Codes last 5 minutes." : "Only numbers added under Admins can sign in."}
         </p>
+
+        <SetupKey />
       </CardContent>
     </Card>
+  );
+}
+
+/** The temporary way in before WhatsApp is connected (the SETUP_KEY secret). */
+function SetupKey() {
+  const [open, setOpen] = useState(false);
+  const [key, setKey] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="text-xs font-medium text-ink underline-offset-4 hover:underline">
+        Sign in with a setup key
+      </button>
+    );
+  }
+  return (
+    <form
+      className="space-y-2 border-t pt-4 text-left"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setError(null);
+        try {
+          await api.loginWithKey(key.trim());
+          location.assign("/admin");
+        } catch (err) {
+          setError(err instanceof ApiError ? err.message : "Couldn't sign in. Try again.");
+          setBusy(false);
+        }
+      }}
+    >
+      <Label htmlFor="setup-key">Setup key</Label>
+      <Input id="setup-key" type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} required />
+      {error && <p className="text-xs text-destructive">{error}</p>}
+      <Button type="submit" variant="secondary" className="w-full" disabled={busy || !key.trim()}>
+        {busy ? "Signing in…" : "Sign in"}
+      </Button>
+    </form>
   );
 }

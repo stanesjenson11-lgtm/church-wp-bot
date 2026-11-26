@@ -15,3 +15,6 @@ worker-configuration.d.ts
 # Real setup values (Meta IDs, tokens) and the generated verify token
 setup.local.json
 *.local.txt
+
+# Launch video output (large; kept local)
+brag-output*/

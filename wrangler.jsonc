@@ -20,7 +20,7 @@
       "binding": "DB",
       "database_name": "church-bot",
       // Filled in by `npx wrangler d1 create church-bot` (Phase 3).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "09532b69-ace7-4b45-90ed-4ba4e2af14c0",
       "migrations_dir": "migrations"
     }
   ],

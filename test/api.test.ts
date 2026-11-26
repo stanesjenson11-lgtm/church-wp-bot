@@ -58,6 +58,41 @@ describe("WhatsApp sign-in", () => {
     expect(await (await poll(cookie)).json()).toEqual({ status: "expired" });
   });
 
+  it("signs in as the owner with the setup key, and only with the right one", async () => {
+    const wrong = await apiCall("POST", "/login/key", { body: { key: "nope" } });
+    expect(wrong.status).toBe(403);
+    expect(wrong.headers.get("set-cookie")).toBeNull();
+
+    const right = await apiCall("POST", "/login/key", { body: { key: "test-setup-key" } });
+    expect(right.status).toBe(200);
+    const sid = right.headers.get("set-cookie")!;
+    expect(sid).toMatch(/^sid=.+HttpOnly; Secure; SameSite=Strict/);
+    const me = (await (await apiCall("GET", "/me", { cookie: sid.split(";")[0] })).json()) as { phone: string; role: string };
+    expect(me).toMatchObject({ phone: OWNER, role: "admin" });
+  });
+
+  it("refuses the setup key when SETUP_KEY isn't set", async () => {
+    const res = await call(
+      new Request(`${ORIGIN}/api/login/key`, {
+        method: "POST",
+        headers: { "x-church": "1", "content-type": "application/json" },
+        body: JSON.stringify({ key: "" }),
+      }),
+      { ...env, SETUP_KEY: "" },
+    );
+    expect(res.status).toBe(400);
+    const off = await call(
+      new Request(`${ORIGIN}/api/login/key`, {
+        method: "POST",
+        headers: { "x-church": "1", "content-type": "application/json" },
+        body: JSON.stringify({ key: "anything" }),
+      }),
+      { ...env, SETUP_KEY: "" },
+    );
+    expect(off.status).toBe(403);
+    expect(((await off.json()) as { error: string }).error).toContain("turned off");
+  });
+
   it("'logout all' from the admin's phone ends every session", async () => {
     mockMeta();
     const cookie = await sessionFor(OWNER);

@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { AdminRow, Me, Overview, Person, Registration, SessionRow, Submission, UsageMonth } from "../lib/shared/api";
 import { AdminInputSchema, BlockInputSchema, EventInputSchema, LIMITS, type BlockInput } from "../lib/shared/blocks";
 import { SETTING_FIELDS } from "../lib/shared/settings";
-import { currentActor, logout, pollLogin, startLogin, type Actor } from "./auth";
+import { currentActor, keyLogin, logout, pollLogin, startLogin, type Actor } from "./auth";
 import { EVENT_SELECT, toEvent } from "./events";
 import { ensureSeeded, istDay, loadBlocks, loadSettings, newId, nowIso, toBlock } from "./store";
 
@@ -91,9 +91,17 @@ export async function handleApi(req: Request, env: Env): Promise<Response> {
 // ---- Sign-in ---------------------------------------------------------------
 
 route("POST", "/login/start", "public", async ({ env }) => {
+  if (!env.BOT_NUMBER) throw new HttpError(503, "The bot's WhatsApp number isn't set up yet (BOT_NUMBER secret).");
   const started = await startLogin(env);
   if (!started) throw new HttpError(429, "Too many sign-in attempts right now. Try again in a few minutes.");
   return json(started.body, 200, [started.setCookie]);
+});
+
+route("POST", "/login/key", "public", async ({ req, env }) => {
+  const { key } = validate(z.object({ key: z.string().min(1).max(200) }), await body(req));
+  const setCookie = await keyLogin(env, req, key);
+  if (!setCookie) throw new HttpError(403, env.SETUP_KEY ? "That setup key isn't right" : "Setup-key sign-in is turned off");
+  return json({ ok: true }, 200, [setCookie]);
 });
 
 route("POST", "/login/poll", "public", async ({ req, env }) => {

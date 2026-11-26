@@ -21,6 +21,7 @@ export default defineConfig(async () => {
             GRAPH_API_VERSION: "v24.0",
             MAIL_RELAY_URL: "",
             MAIL_RELAY_KEY: "",
+            SETUP_KEY: "test-setup-key",
           },
         },
       }),

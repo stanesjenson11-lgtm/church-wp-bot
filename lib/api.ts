@@ -63,6 +63,7 @@ export const api = {
   me: () => get<Me>("/me"),
   loginStart: () => post<LoginStart>("/login/start"),
   loginPoll: () => post<{ status: LoginStatus }>("/login/poll"),
+  loginWithKey: (key: string) => post<{ ok: true }>("/login/key", { key }),
   logout: () => post<{ ok: true }>("/logout"),
 
   overview: () => get<Overview>("/overview"),

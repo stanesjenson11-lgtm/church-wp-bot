@@ -6,6 +6,8 @@ PHONE_NUMBER_ID=
 BOT_NUMBER=
 OWNER_PHONE=
 DRY_RUN=true
+# Temporary dashboard sign-in without WhatsApp (delete once WhatsApp works)
+SETUP_KEY=
 # Optional email relay (apps-script/Code.gs)
 MAIL_RELAY_URL=
 MAIL_RELAY_KEY=
